@@ -19,3 +19,13 @@ Just paste text typed in the wrong keyboard layout, click "Convert," and get the
 - "Руддщ" (typed with Ukrainian layout) → "Hello" (English)
 
 ## Copyright Notice
+
+Copyright © 2025 RomanX88. All Rights Reserved.
+
+This code is provided for personal use only. No permission is granted for:
+- Commercial use
+- Distribution in any marketplace
+- Creating derivative works without explicit written permission
+- Removing copyright notices
+
+For permissions beyond personal use, please contact me via GitHub.

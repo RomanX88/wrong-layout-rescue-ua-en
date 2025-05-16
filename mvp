@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Конвертер розкладки клавіатури</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .text-area-container {
+            display: flex;
+            gap: 20px;
+        }
+        .text-area-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+        }
+        .keyboard {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .key {
+            min-width: 30px;
+            height: 30px;
+            margin: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            font-size: 14px;
+            position: relative;
+        }
+        .key span.ukr {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            color: #4CAF50;
+        }
+        .key span.eng {
+            position: absolute;
+            bottom: 2px;
+            left: 2px;
+            font-size: 10px;
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Конвертер розкладки клавіатури</h1>
+    <div class="container">
+        <div class="text-area-container">
+            <div class="text-area-box">
+                <h3>Вхідний текст</h3>
+                <textarea id="inputText" placeholder="Введіть текст українською або англійською..."></textarea>
+                <div class="controls">
+                    <button id="convertBtn">Конвертувати</button>
+                    <button id="clearInputBtn">Очистити</button>
+                </div>
+            </div>
+            <div class="text-area-box">
+                <h3>Перетворений текст</h3>
+                <textarea id="outputText" placeholder="Тут з'явиться результат..." readonly></textarea>
+                <div class="controls">
+                    <button id="copyBtn">Копіювати</button>
+                    <button id="clearOutputBtn">Очистити</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="keyboard">
+            <h3>Відповідність клавіш</h3>
+            <div class="keyboard-layout"></div>
+        </div>
+    </div>
+
+    <script>
+        // Карта відповідності клавіш (українська розкладка -> англійська розкладка і навпаки)
+        const keyboardMap = {
+            // Верхній ряд
+            'й': 'q', 'q': 'й',
+            'ц': 'w', 'w': 'ц',
+            'у': 'e', 'e': 'у',
+            'к': 'r', 'r': 'к',
+            'е': 't', 't': 'е',
+            'н': 'y', 'y': 'н',
+            'г': 'u', 'u': 'г',
+            'ш': 'i', 'i': 'ш',
+            'щ': 'o', 'o': 'щ',
+            'з': 'p', 'p': 'з',
+            'х': '[', '[': 'х',
+            'ї': ']', ']': 'ї',
+            
+            // Середній ряд
+            'ф': 'a', 'a': 'ф',
+            'і': 's', 's': 'і',
+            'в': 'd', 'd': 'в',
+            'а': 'f', 'f': 'а',
+            'п': 'g', 'g': 'п',
+            'р': 'h', 'h': 'р',
+            'о': 'j', 'j': 'о',
+            'л': 'k', 'k': 'л',
+            'д': 'l', 'l': 'д',
+            'ж': ';', ';': 'ж',
+            'є': "'", "'": 'є',
+            
+            // Нижній ряд
+            'я': 'z', 'z': 'я',
+            'ч': 'x', 'x': 'ч',
+            'с': 'c', 'c': 'с',
+            'м': 'v', 'v': 'м',
+            'и': 'b', 'b': 'и',
+            'т': 'n', 'n': 'т',
+            'ь': 'm', 'm': 'ь',
+            'б': ',', ',': 'б',
+            'ю': '.', '.': 'ю',
+            '.': '/', '/': '.',
+            
+            // Додаткові символи
+            "'": "\\", "\\": "'",
+            
+            // Верхній регістр (великі літери)
+            'Й': 'Q', 'Q': 'Й',
+            'Ц': 'W', 'W': 'Ц',
+            'У': 'E', 'E': 'У',
+            'К': 'R', 'R': 'К',
+            'Е': 'T', 'T': 'Е',
+            'Н': 'Y', 'Y': 'Н',
+            'Г': 'U', 'U': 'Г',
+            'Ш': 'I', 'I': 'Ш',
+            'Щ': 'O', 'O': 'Щ',
+            'З': 'P', 'P': 'З',
+            'Х': '{', '{': 'Х',
+            'Ї': '}', '}': 'Ї',
+            
+            'Ф': 'A', 'A': 'Ф',
+            'І': 'S', 'S': 'І',
+            'В': 'D', 'D': 'В',
+            'А': 'F', 'F': 'А',
+            'П': 'G', 'G': 'П',
+            'Р': 'H', 'H': 'Р',
+            'О': 'J', 'J': 'О',
+            'Л': 'K', 'K': 'Л',
+            'Д': 'L', 'L': 'Д',
+            'Ж': ':', ':': 'Ж',
+            'Є': '"', '"': 'Є',
+            
+            'Я': 'Z', 'Z': 'Я',
+            'Ч': 'X', 'X': 'Ч',
+            'С': 'C', 'C': 'С',
+            'М': 'V', 'V': 'М',
+            'И': 'B', 'B': 'И',
+            'Т': 'N', 'N': 'Т',
+            'Ь': 'M', 'M': 'Ь',
+            'Б': '<', '<': 'Б',
+            'Ю': '>', '>': 'Ю',
+            ',': '?', '?': ',',
+            
+            // Цифри
+            '1': '1',
+            '2': '2',
+            '3': '3',
+            '4': '4',
+            '5': '5',
+            '6': '6',
+            '7': '7',
+            '8': '8',
+            '9': '9',
+            '0': '0',
+            
+            // Символи, які залишаються незмінними
+            ' ': ' ',
+            '!': '!',
+            '@': '@',
+            '#': '#',
+            '$': '$',
+            '%': '%',
+            '^': '^',
+            '&': '&',
+            '*': '*',
+            '(': '(',
+            ')': ')',
+            '-': '-',
+            '_': '_',
+            '=': '=',
+            '+': '+',
+            '`': '`',
+            '~': '~'
+        };
+
+        // Функція для конвертації тексту
+        function convertText(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                result += keyboardMap[char] || char; // Якщо символ відсутній в мапі, залишаємо без змін
+            }
+            return result;
+        }
+
+        // Ініціалізація клавіатури
+        function initKeyboard() {
+            const keyboardLayout = document.querySelector('.keyboard-layout');
+            
+            // Створюємо рядки клавіатури
+            const rows = [
+                ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
+                ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ш', 'щ', 'з', 'х', 'ї', '\\'],
+                ['ф', 'і', 'в', 'а', 'п', 'р', 'о', 'л', 'д', 'ж', 'є'],
+                ['я', 'ч', 'с', 'м', 'и', 'т', 'ь', 'б', 'ю', '.']
+            ];
+            
+            const engRows = [
+                ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
+                ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'],
+                ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'"],
+                ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/']
+            ];
+            
+            // Додаємо кожен рядок клавіатури
+            for (let i = 0; i < rows.length; i++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'keyboard-row';
+                
+                // Додаємо клавіші в рядок
+                for (let j = 0; j < rows[i].length; j++) {
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    
+                    const ukrSpan = document.createElement('span');
+                    ukrSpan.className = 'ukr';
+                    ukrSpan.textContent = rows[i][j];
+                    
+                    const engSpan = document.createElement('span');
+                    engSpan.className = 'eng';
+                    engSpan.textContent = engRows[i][j];
+                    
+                    keyDiv.appendChild(ukrSpan);
+                    keyDiv.appendChild(engSpan);
+                    rowDiv.appendChild(keyDiv);
+                }
+                
+                keyboardLayout.appendChild(rowDiv);
+            }
+            
+            // Додаємо пробіл
+            const spaceRow = document.createElement('div');
+            spaceRow.className = 'keyboard-row';
+            
+            const spaceKey = document.createElement('div');
+            spaceKey.className = 'key';
+            spaceKey.style.width = '300px';
+            spaceKey.textContent = 'Пробіл / Space';
+            
+            spaceRow.appendChild(spaceKey);
+            keyboardLayout.appendChild(spaceRow);
+        }
+
+        // Обробники подій
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            const convertBtn = document.getElementById('convertBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearInputBtn = document.getElementById('clearInputBtn');
+            const clearOutputBtn = document.getElementById('clearOutputBtn');
+            
+            // Ініціалізуємо клавіатуру
+            initKeyboard();
+            
+            // Конвертація тексту
+            convertBtn.addEventListener('click', function() {
+                const input = inputText.value;
+                const output = convertText(input);
+                outputText.value = output;
+            });
+            
+            // Копіювання тексту
+            copyBtn.addEventListener('click', function() {
+                outputText.select();
+                document.execCommand('copy');
+                alert('Текст скопійовано в буфер обміну!');
+            });
+            
+            // Очищення вхідного тексту
+            clearInputBtn.addEventListener('click', function() {
+                inputText.value = '';
+            });
+            
+            // Очищення вихідного тексту
+            clearOutputBtn.addEventListener('click', function() {
+                outputText.value = '';
+            });
+        });
+    </script>
+</body>
+</html>

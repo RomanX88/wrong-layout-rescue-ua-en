@@ -2,7 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Конвертер розкладки клавіатури</title>
+    <title>Конвертер розкладки клавіатури | Wrong Layout Rescue</title>
+    <meta name="author" content="Roman X88 | ArtOfKeyboards">
+    <meta name="description" content="Tool to convert text typed in wrong keyboard layout between Ukrainian and English">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -119,9 +121,24 @@
             <h3>Відповідність клавіш</h3>
             <div class="keyboard-layout"></div>
         </div>
+        
+        <footer class="site-footer">
+            <p>© 2025 <strong>Roman X88</strong> | <span class="company-name">ArtOfKeyboards</span> | All Rights Reserved</p>
+            <p class="tagline">Making keyboard layouts work for you, not against you</p>
+            <p><a href="https://github.com/RomanX88" target="_blank">Follow me on GitHub</a></p>
+        </footer>
     </div>
 
     <script>
+        /*
+         * Wrong Layout Rescue - UA/EN Keyboard Layout Converter
+         * Copyright (C) 2025 Roman X88 (ArtOfKeyboards)
+         * https://github.com/RomanX88/wrong-layout-rescue-ua-en
+         *
+         * This code is provided for personal use only.
+         * All Rights Reserved. Unauthorized use, distribution, or modification is prohibited.
+         */
+        
         // Карта відповідності клавіш (українська розкладка -> англійська розкладка і навпаки)
         const keyboardMap = {
             // Верхній ряд
